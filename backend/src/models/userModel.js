@@ -62,3 +62,14 @@ export const createUser = async ({
 
   return result.insertId;
 };
+export const verifyUserEmail = async (userId) => {
+  const query = `
+    UPDATE users
+    SET is_email_verified = TRUE
+    WHERE id = ?
+  `;
+
+  const [result] = await pool.query(query, [userId]);
+
+  return result.affectedRows;
+};
