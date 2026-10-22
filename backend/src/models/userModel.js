@@ -73,3 +73,21 @@ export const verifyUserEmail = async (userId) => {
 
   return result.affectedRows;
 };
+export const findUserById = async (userId) => {
+  const [rows] = await pool.query(
+    `
+      SELECT
+        id,
+        full_name,
+        email,
+        role,
+        is_email_verified,
+        created_at
+      FROM users
+      WHERE id = ?
+    `,
+    [userId]
+  );
+
+  return rows[0] || null;
+};

@@ -1,5 +1,5 @@
 import { verifyEmailService } from "../services/verifyEmailService.js";
-import { errorMiddleware } from "../middlewares/errorMiddleware.js";
+
 export const verifyEmailController = async (req, res, next) => {
   try {
     const { token } = req.body;
