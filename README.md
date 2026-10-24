@@ -4,7 +4,7 @@
 
 Mục tiêu là xây dựng một sản phẩm fullstack, đồng thời thực hành thiết kế API, tổ chức code theo tầng, bảo vệ các chức năng quản trị và tối ưu những truy vấn lặp lại.
 
-> Trạng thái: đang phát triển. Phần Authentication đã được triển khai và kiểm thử thủ công bằng Postman trong quá trình phát triển. Module Category đang hoàn thiện; chức năng cập nhật đã được viết nhưng còn chờ kiểm thử đầu cuối. Project chưa sẵn sàng cho môi trường production.
+> Trạng thái: đang phát triển. Backend đã triển khai Authentication và Category CRUD, với các luồng cơ bản được kiểm thử thủ công bằng Postman. Bước tiếp theo là xây dựng module Product và tích hợp frontend. Project chưa sẵn sàng cho môi trường production.
 
 ## Công nghệ sử dụng
 
@@ -31,11 +31,11 @@ Mục tiêu là xây dựng một sản phẩm fullstack, đồng thời thực 
 | Authentication | Đăng nhập, kiểm tra email đã xác thực và cấp JWT | Đã triển khai |
 | Authentication | Xác minh JWT cho API được bảo vệ | Đã triển khai |
 | User | Lấy thông tin tài khoản đang đăng nhập | Đã triển khai |
-| Authorization | Kiểm tra quyền admin cho thao tác quản trị | Đã triển khai; cần kiểm thử cùng API Category |
-| Category | Tạo danh mục và kiểm tra tên trùng | Đã viết; chờ kiểm thử đầu cuối |
-| Category | Lấy danh sách danh mục và cache trong bộ nhớ | Đã viết; chờ kiểm thử đầu cuối |
-| Category | Cập nhật một phần thông tin danh mục bằng PATCH | Đã viết; chờ kiểm thử đầu cuối |
-| Category | Xóa danh mục | Chưa triển khai |
+| Authorization | Kiểm tra quyền admin cho thao tác quản trị | Đã triển khai; đã sử dụng JWT admin khi thử API Category |
+| Category | Tạo danh mục và kiểm tra tên trùng | Đã triển khai; đã thử luồng tạo thành công |
+| Category | Lấy danh sách danh mục và cache trong bộ nhớ | Đã triển khai; đã thử lấy danh sách |
+| Category | Cập nhật một phần thông tin danh mục bằng PATCH | Đã triển khai; đã thử cập nhật riêng mô tả |
+| Category | Xóa danh mục | Đã triển khai; đã thử luồng cơ bản |
 | Product | Quản lý và tra cứu sản phẩm | Kế hoạch |
 | Frontend | Giao diện đăng ký, xác thực email và đăng nhập | Kế hoạch tích hợp |
 
@@ -88,7 +88,7 @@ Khi xảy ra lỗi, controller chuyển lỗi bằng `next(error)` tới middlew
 
 ### Cache danh mục
 
-Danh sách category được cache trong bộ nhớ của tiến trình backend với TTL 60 giây. Khi cache còn hạn, service trả dữ liệu từ cache. Khi tạo hoặc cập nhật category thành công, cache được xóa để lần đọc sau lấy dữ liệu mới từ MySQL.
+Danh sách category được cache trong bộ nhớ của tiến trình backend với TTL 60 giây. Khi cache còn hạn, service trả dữ liệu từ cache. Khi tạo, cập nhật hoặc xóa category thành công, cache được xóa để lần đọc sau lấy dữ liệu mới từ MySQL.
 
 Cache hiện tại chỉ có hiệu lực trong một tiến trình và mất khi backend khởi động lại.
 
@@ -189,11 +189,12 @@ Các đường dẫn dưới đây phản ánh thiết kế đang phát triển;
 | POST | `/api/auth/verify-email` | Xác thực email bằng token | Công khai; yêu cầu token hợp lệ |
 | POST | `/api/auth/login` | Đăng nhập và nhận JWT | Công khai |
 | GET | `/api/auth/profile` | Lấy thông tin tài khoản hiện tại | Đã đăng nhập |
-| POST | `/api/categories` | Tạo danh mục | Admin |
-| GET | `/api/categories` | Lấy danh sách danh mục | Theo middleware gắn trong route |
-| PATCH | `/api/categories/:id` | Cập nhật danh mục | Admin |
+| POST | `/api/category` | Tạo danh mục | Admin |
+| GET | `/api/category` | Lấy danh sách danh mục | Công khai |
+| PATCH | `/api/category/:id` | Cập nhật một phần danh mục | Admin |
+| DELETE | `/api/category/:id` | Xóa danh mục | Admin |
 
-DELETE category chưa được đưa vào danh sách API đã triển khai.
+Các thao tác POST, PATCH và DELETE Category chạy qua middleware xác thực JWT và kiểm tra quyền admin. DELETE hiện xóa hẳn bản ghi; quy tắc xử lý danh mục còn chứa sản phẩm sẽ được bổ sung cùng module Product.
 
 ## Kiểm thử thủ công
 
@@ -205,19 +206,28 @@ Authentication được kiểm tra qua Postman trong quá trình phát triển. 
 - Gọi profile khi không có JWT, JWT sai, hết hạn hoặc hợp lệ.
 - Gọi API quản trị bằng tài khoản thường và tài khoản admin.
 
-Bước kiểm thử Category tiếp theo:
+Các luồng Category đã chạy thử trong quá trình phát triển:
 
-1. Đăng nhập bằng tài khoản admin và lấy JWT.
-2. Tạo category bằng POST, ghi lại ID được trả về.
-3. Gọi GET để kiểm tra danh sách.
-4. PATCH riêng tên hoặc riêng mô tả và kiểm tra trường không gửi được giữ nguyên.
-5. Kiểm tra ID không tồn tại, dữ liệu không hợp lệ và tên danh mục bị trùng.
-6. Gọi GET sau thao tác ghi để kiểm tra cache được làm mới.
+- Đăng nhập lại sau khi cấp quyền admin để lấy JWT mới.
+- Tạo danh mục bằng POST và lấy danh sách bằng GET.
+- PATCH riêng mô tả, giữ nguyên tên danh mục.
+- Gọi GET sau cập nhật để kiểm tra dữ liệu mới được trả về.
+- Xóa danh mục qua DELETE theo ID.
+
+Các trường hợp cần kiểm thử bổ sung hoặc kiểm tra lại khi sửa code:
+
+- PATCH riêng tên và kiểm tra chuẩn hóa khoảng trắng, chữ hoa.
+- Tạo hoặc cập nhật tên bị trùng; gửi tên rỗng hoặc sai kiểu dữ liệu.
+- PATCH với body rỗng và kiểm tra cách xử lý các trường không được gửi.
+- PATCH hoặc DELETE với ID không hợp lệ hoặc không tồn tại.
+- DELETE lại cùng ID sau khi đã xóa thành công.
+- Gọi API quản trị khi không có JWT, JWT không hợp lệ hoặc tài khoản không có quyền admin.
+- Gọi GET ngay sau POST, PATCH và DELETE để kiểm tra cache được làm mới; kiểm tra thêm khi TTL hết hạn.
 
 ## Kế hoạch phát triển
 
-- Hoàn tất kiểm thử POST, GET và PATCH Category.
-- Bổ sung DELETE Category và quy tắc xử lý danh mục đang có sản phẩm.
+- Mở rộng kiểm thử các trường hợp lỗi và phân quyền của Category CRUD.
+- Bổ sung quy tắc xử lý danh mục đang có sản phẩm khi xây dựng module Product.
 - Xây dựng module Product và liên kết với Category.
 - Tích hợp các luồng Authentication vào frontend.
 - Bổ sung gửi lại email xác thực và xử lý tài khoản chưa xác thực.
