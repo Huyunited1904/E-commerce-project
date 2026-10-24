@@ -15,6 +15,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 app.use("/api/auth",userRoutes);
-app.use("api/category",categoryRoutes);
+app.use("/api/category",categoryRoutes);
 app.use(errorMiddleware);
 export default app;

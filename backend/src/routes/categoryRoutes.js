@@ -2,7 +2,8 @@ import express from "express";
 import {
   createCategoryController,
   getAllCategoriesController,
-  updateCategoryController
+  updateCategoryController,
+  deleteCategoryController
 } from "../controllers/categoryController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
@@ -16,5 +17,12 @@ router.patch(
   authMiddleware,
   adminMiddleware,
   updateCategoryController
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  deleteCategoryController
 );
 export default router;

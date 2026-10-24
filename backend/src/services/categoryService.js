@@ -4,6 +4,7 @@ import {
   getAllCategories,
   updateCategoryById,
   findCategoryById,
+  deleteCategoryById
 } from "../models/categoryModel.js";
 
 let categoriesCache = null;
@@ -165,4 +166,28 @@ export const updateCategoryService = async (
 
     throw error;
   }
+};
+
+export const deleteCategoryService = async (id) => {
+  const categoryId = Number(id);
+
+  if (!Number.isSafeInteger(categoryId) || categoryId <= 0) {
+    const error = new Error("Invalid category ID");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const affectedRows = await deleteCategoryById(categoryId);
+
+  if (affectedRows === 0) {
+    const error = new Error("Category not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  clearCategoriesCache();
+
+  return {
+    message: "Category deleted successfully",
+  };
 };

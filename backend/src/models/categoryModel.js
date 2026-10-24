@@ -105,3 +105,14 @@ export const findCategoryById = async (id) => {
 
   return rows[0] || null;
 };
+
+export const deleteCategoryById = async (id) => {
+  const query = `
+    DELETE FROM categories
+    WHERE id = ?
+  `;
+
+  const [result] = await pool.query(query, [id]);
+
+  return result.affectedRows;
+};

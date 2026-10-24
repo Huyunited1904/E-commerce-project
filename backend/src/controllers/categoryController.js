@@ -1,6 +1,7 @@
 import { createCategoryService } from "../services/categoryService.js";
 import { getAllCategoriesService } from "../services/categoryService.js";
-import { updateCategoryById } from "../models/categoryModel.js";
+import { updateCategoryService } from "../services/categoryService.js";
+import { deleteCategoryService } from "../services/categoryService.js";
 export const createCategoryController = async (
   req,
   res,
@@ -52,6 +53,20 @@ export const updateCategoryController = async (
       success: true,
       message: "Category updated successfully",
       data: category,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const deleteCategoryController = async (req, res, next) => {
+  try {
+    const result = await deleteCategoryService(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
     });
   } catch (error) {
     next(error);
