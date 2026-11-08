@@ -82,3 +82,22 @@ export const getAllProducts = async ({ limit, offset }) => {
 
   return rows;
 };
+
+export const findProductById = async (id) => {
+  const query = `
+    SELECT
+      id,
+      category_id,
+      name,
+      description,
+      price,
+      stock,
+      image_url
+    FROM products
+    WHERE id = ?
+  `;
+
+  const [rows] = await pool.query(query, [id]);
+
+  return rows[0];
+};

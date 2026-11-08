@@ -1,7 +1,8 @@
 import { createProduct } from "../models/productModel.js";
 import { findCategoryById } from "../models/categoryModel.js";
-import { getAllProducts }
+import {getAllProducts}
  from "../models/productModel.js";
+ import { findProductById } from "../models/productModel.js";
 
 export const createProductService = async ({
   categoryId,
@@ -126,4 +127,30 @@ export const getAllProductsService = async ({ page = "1" } = {}) => {
   const products = await getAllProducts({ limit, offset });
 
   return products;
+};
+
+export const getProductByIdService = async (id) => {
+  if (typeof id !== "string" || !/^[1-9]\d*$/.test(id)) {
+    const error = new Error("Product ID must be a positive integer");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const productId = Number(id);
+
+  if (!Number.isSafeInteger(productId) || productId > 2147483647) {
+    const error = new Error("Product ID is out of range");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const product = await findProductById(productId);
+
+  if (!product) {
+    const error = new Error("Product not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return product;
 };

@@ -1,5 +1,6 @@
 import { createProductService } from "../services/ProductService.js";
 import { getAllProductsService } from "../services/ProductService.js";
+import { getProductByIdService } from "../services/ProductService.js";
 export const createProductController = async (req, res, next) => {
   try {
     const product = await createProductService(req.body);
@@ -23,6 +24,19 @@ export const getAllProductsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductByIdController = async (req, res, next) => {
+  try {
+    const product = await getProductByIdService(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      data: product,
     });
   } catch (error) {
     next(error);
