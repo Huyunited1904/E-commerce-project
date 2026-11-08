@@ -4,6 +4,7 @@ import { initializeUserTable } from "./models/userModel.js";
 import { initializeEmailVerificationTokenTable } from "./models/emailVerificationTokenModel.js";
 import { testConnection } from "./config/db.js";
 import { initializeCategoryTable } from "./models/categoryModel.js";
+import { initializeProductTable } from "./models/productModel.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -14,6 +15,7 @@ const startServer = async () => {
     await initializeUserTable();
     await initializeEmailVerificationTokenTable();
     await initializeCategoryTable();
+    await initializeProductTable();
     app.listen(PORT, () => {
       console.log(`Server is running at http://localhost:${PORT}`);
     });
